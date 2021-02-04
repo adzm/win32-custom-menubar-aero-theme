@@ -2,7 +2,7 @@
 Custom owner menubar drawing for win32 even with aero themes using undocumented Windows messages and structures, previously unknown.
 
 ![](menubar-custom.gif)
-![](menubar-original.gif)
+![](menubar-normal.gif)
 
 ## Summary
 Drawing the menubar is handled by Windows, but does not expose an owner-draw or custom draw interface the same way that popup menus do. However, undocumented messages are sent to the window which are handled by uxtheme.dll via DefWindowProc to implement menubar drawing, which we can override to implement custom drawing and measurement.
