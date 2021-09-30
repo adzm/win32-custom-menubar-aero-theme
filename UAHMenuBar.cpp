@@ -7,6 +7,37 @@
 
 static HTHEME g_menuTheme = nullptr;
 
+// ugly colors for illustration purposes
+static HBRUSH g_brBarBackground = CreateSolidBrush(RGB(0x80, 0x80, 0xFF));
+
+void UAHDrawMenuNCBottomLine(HWND hWnd)
+{
+    MENUBARINFO mbi = { sizeof(mbi) };
+    if (!GetMenuBarInfo(hWnd, OBJID_MENU, 0, &mbi))
+    {
+        return;
+    }
+
+    RECT rcClient = { 0 };
+    GetClientRect(hWnd, &rcClient);
+    MapWindowPoints(hWnd, nullptr, (POINT*)&rcClient, 2);
+
+    RECT rcWindow = { 0 };
+    GetWindowRect(hWnd, &rcWindow);
+
+    OffsetRect(&rcClient, -rcWindow.left, -rcWindow.top);
+
+    // the rcBar is offset by the window rect
+    RECT rcAnnoyingLine = rcClient;
+    rcAnnoyingLine.bottom = rcAnnoyingLine.top;
+    rcAnnoyingLine.top--;
+
+
+    HDC hdc = GetWindowDC(hWnd);
+    FillRect(hdc, &rcAnnoyingLine, g_brBarBackground);
+    ReleaseDC(hWnd, hdc);
+}
+
 // processes messages related to UAH / custom menubar drawing.
 // return true if handled, false to continue with normal processing in your wndproc
 bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* lr)
@@ -31,8 +62,6 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
             OffsetRect(&rc, -rcWindow.left, -rcWindow.top);
         }
 
-        // ugly colors for illustration purposes
-        static HBRUSH g_brBarBackground = CreateSolidBrush(RGB(0x80, 0x80, 0xFF));
         FillRect(pUDM->hdc, &rc, g_brBarBackground);
 
         return true;
@@ -127,6 +156,12 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
         // continue processing in main wndproc
         return false;
     }
+    case WM_NCPAINT:
+    case WM_NCACTIVATE:
+        *lr = DefWindowProc(hWnd, message, wParam, lParam);
+        UAHDrawMenuNCBottomLine(hWnd);
+        return true;
+        break;
     default:
         return false;
     }
