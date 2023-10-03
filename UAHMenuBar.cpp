@@ -94,7 +94,7 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
         int iTextStateID = 0;
         int iBackgroundStateID = 0;
         {
-            if ((pUDMI->dis.itemState & ODS_INACTIVE) | (pUDMI->dis.itemState & ODS_DEFAULT)) {
+            if ((pUDMI->dis.itemState & ODS_INACTIVE) || (pUDMI->dis.itemState & ODS_DEFAULT)) {
                 // normal display
                 iTextStateID = MPI_NORMAL;
                 iBackgroundStateID = MPI_NORMAL;
