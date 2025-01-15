@@ -74,8 +74,10 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
         static HBRUSH g_brItemBackground = CreateSolidBrush(RGB(0xC0, 0xC0, 0xFF));
         static HBRUSH g_brItemBackgroundHot = CreateSolidBrush(RGB(0xD0, 0xD0, 0xFF));
         static HBRUSH g_brItemBackgroundSelected = CreateSolidBrush(RGB(0xE0, 0xE0, 0xFF));
+        static HBRUSH g_brItemBorder = CreateSolidBrush(RGB(0xB0, 0xB0, 0xFF));
 
         HBRUSH* pbrBackground = &g_brItemBackground;
+        HBRUSH* pbrBorder = &g_brItemBackground;
 
         // get the menu item string
         wchar_t menuString[256] = { 0 };
@@ -94,29 +96,31 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
         int iTextStateID = 0;
         int iBackgroundStateID = 0;
         {
-            if ((pUDMI->dis.itemState & ODS_INACTIVE) | (pUDMI->dis.itemState & ODS_DEFAULT)) {
+            if ((pUDMI->dis.itemState & ODS_INACTIVE) || (pUDMI->dis.itemState & ODS_DEFAULT)) {
                 // normal display
-                iTextStateID = MPI_NORMAL;
-                iBackgroundStateID = MPI_NORMAL;
+                iTextStateID = MBI_NORMAL;
+                iBackgroundStateID = MBI_NORMAL;
             }
             if (pUDMI->dis.itemState & ODS_HOTLIGHT) {
                 // hot tracking
-                iTextStateID = MPI_HOT;
-                iBackgroundStateID = MPI_HOT;
+                iTextStateID = MBI_HOT;
+                iBackgroundStateID = MBI_HOT;
 
                 pbrBackground = &g_brItemBackgroundHot;
+                pbrBorder = &g_brItemBorder;
             }
             if (pUDMI->dis.itemState & ODS_SELECTED) {
-                // clicked -- MENU_POPUPITEM has no state for this, though MENU_BARITEM does
-                iTextStateID = MPI_HOT;
-                iBackgroundStateID = MPI_HOT;
+                // clicked
+                iTextStateID = MBI_PUSHED;
+                iBackgroundStateID = MBI_PUSHED;
 
                 pbrBackground = &g_brItemBackgroundSelected;
+                pbrBorder = &g_brItemBorder;
             }
             if ((pUDMI->dis.itemState & ODS_GRAYED) || (pUDMI->dis.itemState & ODS_DISABLED)) {
                 // disabled / grey text
-                iTextStateID = MPI_DISABLED;
-                iBackgroundStateID = MPI_DISABLED;
+                iTextStateID = MBI_DISABLED;
+                iBackgroundStateID = MBI_DISABLED;
             }
             if (pUDMI->dis.itemState & ODS_NOACCEL) {
                 dwFlags |= DT_HIDEPREFIX;
@@ -127,9 +131,10 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
             g_menuTheme = OpenThemeData(hWnd, L"Menu");
         }
 
-        DTTOPTS opts = { sizeof(opts), DTT_TEXTCOLOR, iTextStateID != MPI_DISABLED ? RGB(0x00, 0x00, 0x20) : RGB(0x40, 0x40, 0x40) };
+        DTTOPTS opts = { sizeof(opts), DTT_TEXTCOLOR, iTextStateID != MBI_DISABLED ? RGB(0x00, 0x00, 0x20) : RGB(0x40, 0x40, 0x40) };
 
         FillRect(pUDMI->um.hdc, &pUDMI->dis.rcItem, *pbrBackground);
+        FrameRect(pUDMI->um.hdc, &pUDMI->dis.rcItem, *pbrBorder);
         DrawThemeTextEx(g_menuTheme, pUDMI->um.hdc, MENU_BARITEM, MBI_NORMAL, menuString, mii.cch, dwFlags, &pUDMI->dis.rcItem, &opts);
 
         return true;
