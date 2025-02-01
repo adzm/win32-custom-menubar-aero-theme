@@ -101,7 +101,7 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
                 iTextStateID = MBI_NORMAL;
                 iBackgroundStateID = MBI_NORMAL;
             }
-            if (pUDMI->dis.itemState & ODS_HOTLIGHT) {
+            if ((pUDMI->dis.itemState & ODS_HOTLIGHT) && !(pUDMI->dis.itemState & ODS_INACTIVE)) {
                 // hot tracking
                 iTextStateID = MBI_HOT;
                 iBackgroundStateID = MBI_HOT;
@@ -117,8 +117,8 @@ bool UAHWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* 
                 pbrBackground = &g_brItemBackgroundSelected;
                 pbrBorder = &g_brItemBorder;
             }
-            if ((pUDMI->dis.itemState & ODS_GRAYED) || (pUDMI->dis.itemState & ODS_DISABLED)) {
-                // disabled / grey text
+            if ((pUDMI->dis.itemState & ODS_GRAYED) || (pUDMI->dis.itemState & ODS_DISABLED) || (pUDMI->dis.itemState & ODS_INACTIVE)) {
+                // disabled / grey text / inactive
                 iTextStateID = MBI_DISABLED;
                 iBackgroundStateID = MBI_DISABLED;
             }
